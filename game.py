@@ -1,5 +1,7 @@
 import os
+import random
 from enum import Enum
+from pprint import pprint
 from typing import List
 
 import pygame
@@ -8,11 +10,25 @@ from pygame.constants import QUIT, KEYDOWN, K_ESCAPE, MOUSEBUTTONUP
 from pygame.rect import Rect
 
 SCREENRECT = Rect(0, 0, 1000, 1000)
-PANE_WIDTH = 7
+PANE_WIDTH = 6
 PANE_HEIGHT = 6
 CARD_SIZE = 100
 
 main_dir = os.path.split(os.path.abspath(__file__))[0]
+
+chars = ["接", "搬", "新", "旧", "重",
+         "轻", "换", "最", "洗", "练",
+         "过", "节", "楼", "巧", "让",
+         "票", "绿", "租"]
+
+shuffled_chars = list(chars * 2)
+random.shuffle(shuffled_chars)
+
+card_chars = [[shuffled_chars[i + j * PANE_HEIGHT]
+               for i in range(PANE_WIDTH)]
+              for j in range(PANE_HEIGHT)]
+
+pprint(card_chars)
 
 
 class CardState(Enum):
@@ -55,7 +71,7 @@ def drawCard(font, screen, x, y, state: CardState):
     if state == CardState.SHOWN:
         rect = Rect(CARD_SIZE * x, CARD_SIZE * y, CARD_SIZE, CARD_SIZE)
         screen.fill(colors["background"], rect=rect)
-        font.render_to(screen, (CARD_SIZE * x, CARD_SIZE * y), "猫", colors["grey_dark"],
+        font.render_to(screen, (CARD_SIZE * x, CARD_SIZE * y), card_chars[y][x], colors["grey_dark"],
                        size=CARD_SIZE, style=freetype.STYLE_NORMAL)
 
 
