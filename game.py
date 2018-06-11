@@ -45,10 +45,10 @@ class Back(pygame.sprite.Sprite):
     card_back_image = load_image('card_back_square.jpg')
     card_back_image = pygame.transform.scale(card_back_image, (CARD_SIZE, CARD_SIZE))
 
-    def __init__(self):
+    def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self, self.containers)
         self.image = self.card_back_image
-        self.rect = Rect(0, 0, CARD_SIZE, CARD_SIZE)
+        self.rect = Rect(x, y, CARD_SIZE, CARD_SIZE)
 
 
 def drawCard(font, screen, x, y, state: CardState):
@@ -76,7 +76,8 @@ def main():
     all = pygame.sprite.RenderUpdates()
     Back.containers = all
 
-    card_backs = [[Back() for i in range(PANE_HEIGHT)] for j in range(PANE_WIDTH)]
+    card_backs = [[Back(j * CARD_SIZE, i * CARD_SIZE) for i in range(PANE_HEIGHT)]
+                  for j in range(PANE_WIDTH)]
 
     # update all the sprites
     all.update()
@@ -105,7 +106,7 @@ def main():
 
 
 def _update_cards(all, card_state, font, screen):
-    screen.fill(pygame.Color(200, 200, 200))
+    screen.fill(colors["background"])
     dirty = all.draw(screen)
     pygame.display.update(dirty)
     update(font, screen, card_state)
