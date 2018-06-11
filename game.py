@@ -1,5 +1,6 @@
 import os
 import random
+from collections import namedtuple
 from enum import Enum
 from pprint import pprint
 from typing import List
@@ -21,7 +22,14 @@ chars = ["接", "搬", "新", "旧", "重",
          "过", "节", "楼", "巧", "让",
          "票", "绿", "租"]
 
+Coord = namedtuple("Coord", "x y")
+Player = namedtuple("Player", "name score")
+players = [Player("Daniil", 0),
+           Player("Julia", 0),
+           Player("Lia", 0)]
+
 shuffled_chars = list(chars * 2)
+# random.seed(42)
 random.shuffle(shuffled_chars)
 
 card_chars = [[shuffled_chars[i + j * PANE_HEIGHT]
@@ -68,9 +76,11 @@ class Back(pygame.sprite.Sprite):
 
 
 def drawCard(font, screen, x, y, state: CardState):
-    if state == CardState.SHOWN:
+    if not state == CardState.HIDDEN:
         rect = Rect(CARD_SIZE * x, CARD_SIZE * y, CARD_SIZE, CARD_SIZE)
         screen.fill(colors["background"], rect=rect)
+
+    if state == CardState.SHOWN:
         font.render_to(screen, (CARD_SIZE * x, CARD_SIZE * y), card_chars[y][x], colors["grey_dark"],
                        size=CARD_SIZE, style=freetype.STYLE_NORMAL)
 
@@ -83,6 +93,7 @@ def update(font, screen, cards_state: List[List[CardState]]):
 
 def main():
     winstyle = 0  # | pygame.FULLSCREEN
+    active_player = players[0]
     current_dir = os.path.dirname(os.path.abspath(__file__))
     screen = pygame.display.set_mode(SCREENRECT.size, winstyle, 32)
 
@@ -119,8 +130,16 @@ def main():
                     card_state[x][y] = CardState.SHOWN
                     if len(shown_cards) == 2:
                         hide_card_coord = shown_cards.pop(0)
-                        card_state[hide_card_coord[0]][hide_card_coord[1]] = CardState.HIDDEN
+                        if card_state[hide_card_coord[0]][hide_card_coord[1]] != CardState.REMOVED:
+                            card_state[hide_card_coord[0]][hide_card_coord[1]] = CardState.HIDDEN
                     shown_cards.append((x, y))
+                    if len(shown_cards) == 2:
+                        clicked = Coord(x, y)
+                        shown = Coord(shown_cards[0][0], shown_cards[0][1])
+                        if card_chars[clicked.y][clicked.x] == card_chars[shown.y][shown.x]:
+                            card_state[clicked.x][clicked.y] = CardState.REMOVED
+                            card_state[shown.x][shown.y] = CardState.REMOVED
+
                 elif state == CardState.SHOWN:
                     card_state[x][y] = CardState.HIDDEN
                     if (x, y) in shown_cards:
