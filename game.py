@@ -79,6 +79,8 @@ def main():
     card_backs = [[Back(j * CARD_SIZE, i * CARD_SIZE) for i in range(PANE_HEIGHT)]
                   for j in range(PANE_WIDTH)]
 
+    shown_cards = []
+
     # update all the sprites
     all.update()
     _update_cards(all, card_state, font, screen)
@@ -99,8 +101,14 @@ def main():
                 state = card_state[x][y]
                 if state == CardState.HIDDEN:
                     card_state[x][y] = CardState.SHOWN
+                    if len(shown_cards) == 2:
+                        hide_card_coord = shown_cards.pop(0)
+                        card_state[hide_card_coord[0]][hide_card_coord[1]] = CardState.HIDDEN
+                    shown_cards.append((x, y))
                 elif state == CardState.SHOWN:
                     card_state[x][y] = CardState.HIDDEN
+                    if (x, y) in shown_cards:
+                        shown_cards.remove((x, y))
 
                 _update_cards(all, card_state, font, screen)
 
