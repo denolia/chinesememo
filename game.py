@@ -23,10 +23,16 @@ chars = ["接", "搬", "新", "旧", "重",
          "票", "绿", "租"]
 
 Coord = namedtuple("Coord", "x y")
-Player = namedtuple("Player", "name score")
-players = [Player("Daniil", 0),
-           Player("Julia", 0),
-           Player("Lia", 0)]
+
+
+# Player = namedtuple("Player", "name score")
+
+
+class Player:
+    def __init__(self, name):
+        self.name = name
+        self.score = 0
+
 
 shuffled_chars = list(chars * 2)
 # random.seed(42)
@@ -91,8 +97,27 @@ def update(font, screen, cards_state: List[List[CardState]]):
             drawCard(font, screen, x, y, cards_state[x][y])
 
 
+def _update_cards_and_score(all, card_state, font, screen, players, active_player):
+    screen.fill(colors["background"])
+    dirty = all.draw(screen)
+    pygame.display.update(dirty)
+    update(font, screen, card_state)
+
+    for i, player in enumerate(players):
+        color = colors["red"] if player == active_player else colors["grey_dark"]
+        font.render_to(screen, (int(CARD_SIZE * (PANE_WIDTH + 0.5)), int(CARD_SIZE / 2) * (i + 1)),
+                       player.name + ": " + str(player.score), color, size=int(CARD_SIZE / 2),
+                       style=freetype.STYLE_NORMAL)
+
+    pygame.display.flip()
+
+
 def main():
     winstyle = 0  # | pygame.FULLSCREEN
+    players = [Player("Daniil"),
+               Player("Julia"),
+               Player("Lia")]
+
     active_player = players[0]
     current_dir = os.path.dirname(os.path.abspath(__file__))
     screen = pygame.display.set_mode(SCREENRECT.size, winstyle, 32)
@@ -110,7 +135,8 @@ def main():
 
     # update all the sprites
     all.update()
-    _update_cards(all, card_state, font, screen)
+    _update_cards_and_score(all, card_state, font, screen, players, active_player)
+    active_player_index = 0
     while True:
 
         for event in pygame.event.get():
@@ -127,6 +153,7 @@ def main():
 
                 state = card_state[x][y]
                 if state == CardState.HIDDEN:
+
                     card_state[x][y] = CardState.SHOWN
                     if len(shown_cards) == 2:
                         hide_card_coord = shown_cards.pop(0)
@@ -137,23 +164,19 @@ def main():
                         clicked = Coord(x, y)
                         shown = Coord(shown_cards[0][0], shown_cards[0][1])
                         if card_chars[clicked.y][clicked.x] == card_chars[shown.y][shown.x]:
+                            active_player.score += 1
+
                             card_state[clicked.x][clicked.y] = CardState.REMOVED
                             card_state[shown.x][shown.y] = CardState.REMOVED
+                    active_player_index += 1
+                    active_player = players[active_player_index % 3]
+                # elif state == CardState.SHOWN:
+                #     card_state[x][y] = CardState.HIDDEN
+                #     if (x, y) in shown_cards:
+                #         shown_cards.remove((x, y))
 
-                elif state == CardState.SHOWN:
-                    card_state[x][y] = CardState.HIDDEN
-                    if (x, y) in shown_cards:
-                        shown_cards.remove((x, y))
+                _update_cards_and_score(all, card_state, font, screen, players, active_player)
 
-                _update_cards(all, card_state, font, screen)
-
-
-def _update_cards(all, card_state, font, screen):
-    screen.fill(colors["background"])
-    dirty = all.draw(screen)
-    pygame.display.update(dirty)
-    update(font, screen, card_state)
-    pygame.display.flip()
 
 
 if __name__ == '__main__':
