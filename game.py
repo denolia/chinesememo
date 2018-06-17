@@ -17,10 +17,14 @@ CARD_SIZE = 100
 
 main_dir = os.path.split(os.path.abspath(__file__))[0]
 
-chars = ["接", "搬", "新", "旧", "重",
-         "轻", "换", "最", "洗", "练",
-         "过", "节", "楼", "巧", "让",
-         "票", "绿", "租"]
+# chars = ["接", "搬", "新", "旧", "重",
+#          "轻", "换", "最", "洗", "练",
+#          "过", "节", "楼", "巧", "让",
+#          "票", "绿", "租"]
+chars = ["猫", "牛", "狗", "马", "羊",
+         "黄", "绿", "蓝", "黑", "白",
+         "一", "二", "三", "四", "五",
+         "日", "月", "年"]
 
 Coord = namedtuple("Coord", "x y")
 
@@ -116,7 +120,8 @@ def main():
     winstyle = 0  # | pygame.FULLSCREEN
     players = [Player("Daniil"),
                Player("Julia"),
-               Player("Lia")]
+               # Player("Lia")
+               ]
 
     active_player = players[0]
     current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -169,7 +174,7 @@ def main():
                             card_state[clicked.x][clicked.y] = CardState.REMOVED
                             card_state[shown.x][shown.y] = CardState.REMOVED
                     active_player_index += 1
-                    active_player = players[active_player_index % 3]
+                    active_player = players[active_player_index % len(players)]
                 # elif state == CardState.SHOWN:
                 #     card_state[x][y] = CardState.HIDDEN
                 #     if (x, y) in shown_cards:
